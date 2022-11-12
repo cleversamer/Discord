@@ -1,0 +1,36 @@
+{
+  "name": "realtime-video-chatting",
+  "author": {
+    "name": "Samer A.",
+    "website": "https://cleversamer.web.app/"
+  },
+  "description": "Starter react native project built by @cleversamerr",
+  "version": "1.0.0",
+  "main": "node_modules/expo/AppEntry.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "fix": "expo doctor --fix-dependencies"
+  },
+  "dependencies": {
+    "@expo/vector-icons": "^13.0.0",
+    "@react-native-community/netinfo": "9.3.5",
+    "@react-navigation/native": "^6.0.11",
+    "@react-navigation/native-stack": "^6.7.0",
+    "@rneui/base": "^4.0.0-rc.6",
+    "@rneui/themed": "^4.0.0-rc.6",
+    "expo": "^47.0.0",
+    "expo-constants": "~14.0.2",
+    "expo-status-bar": "~1.4.2",
+    "react": "18.1.0",
+    "react-native": "0.70.5",
+    "react-native-dotenv": "^3.3.1",
+    "react-native-gesture-handler": "~2.8.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.19.3"
+  },
+  "private": true
+}
