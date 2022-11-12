@@ -1,4 +1,4 @@
-# Realtime Video Chatting 🚀
+# Discord Clone 🚀
 
 ## 🔴 Live Demo
 
@@ -6,7 +6,7 @@ Not live yet...
 
 ## Description
 
-Realtime video chat application w/ MERN Stack + Socket.IO + WebRTC
+Discord clone with realtime video chat application built entirely with the MERN Stack + Socket.IO + WebRTC.
 
 ## Getting Started
 
