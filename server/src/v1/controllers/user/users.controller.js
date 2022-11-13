@@ -15,12 +15,12 @@ module.exports.isAuth = async (req, res, next) => {
   }
 };
 
-module.exports.verifyEmailOrPhone = (key) => async (req, res, next) => {
+module.exports.verifyIdentifier = (key) => async (req, res, next) => {
   try {
     const user = req.user;
     const { code } = req.body;
 
-    const verifiedUser = await usersService.verifyEmailOrPhone(key, user, code);
+    const verifiedUser = await usersService.verifyIdentifier(key, user, code);
 
     res.status(httpStatus.OK).json(_.pick(verifiedUser, CLIENT_SCHEMA));
   } catch (err) {
@@ -28,24 +28,23 @@ module.exports.verifyEmailOrPhone = (key) => async (req, res, next) => {
   }
 };
 
-module.exports.resendEmailOrPhoneVerificationCode =
-  (key) => async (req, res, next) => {
-    try {
-      const user = req.user;
-      const { lang } = req.query;
+module.exports.resendVerificationCode = (key) => async (req, res, next) => {
+  try {
+    const user = req.user;
+    const { lang } = req.query;
 
-      await usersService.resendEmailOrPhoneVerificationCode(key, user, lang);
+    await usersService.resendVerificationCode(key, user, lang);
 
-      const response = {
-        ok: true,
-        message: success.auth[`${key}VerificationCodeSent`],
-      };
+    const response = {
+      ok: true,
+      message: success.auth[`${key}VerificationCodeSent`],
+    };
 
-      res.status(httpStatus.OK).json(response);
-    } catch (err) {
-      next(err);
-    }
-  };
+    res.status(httpStatus.OK).json(response);
+  } catch (err) {
+    next(err);
+  }
+};
 
 module.exports.changePassword = async (req, res, next) => {
   try {
@@ -67,16 +66,13 @@ module.exports.changePassword = async (req, res, next) => {
 
 module.exports.sendForgotPasswordCode = async (req, res, next) => {
   try {
-    const { emailOrPhone, sendTo, lang } = req.query;
+    const { emailOrUsername, lang } = req.query;
 
-    await usersService.sendForgotPasswordCode(emailOrPhone, sendTo, lang);
+    await usersService.sendForgotPasswordCode(emailOrUsername, lang);
 
     const response = {
       ok: true,
-      message:
-        sendTo === "phone"
-          ? success.auth.passwordResetCodeSentToPhone
-          : success.auth.passwordResetCodeSentToEmail,
+      message: success.auth.passwordResetCodeSentToEmail,
     };
 
     res.status(httpStatus.OK).json(response);
@@ -87,10 +83,10 @@ module.exports.sendForgotPasswordCode = async (req, res, next) => {
 
 module.exports.handleForgotPassword = async (req, res, next) => {
   try {
-    const { emailOrPhone, code, newPassword } = req.body;
+    const { emailOrUsername, code, newPassword } = req.body;
 
     const user = await usersService.resetPasswordWithCode(
-      emailOrPhone,
+      emailOrUsername,
       code,
       newPassword
     );
@@ -104,7 +100,7 @@ module.exports.handleForgotPassword = async (req, res, next) => {
 module.exports.updateProfile = async (req, res, next) => {
   try {
     const user = req.user;
-    const { name, email, phone, password, lang } = req.body;
+    const { name, email, username, password, lang } = req.body;
     const avatar = req?.files?.avatar || null;
 
     const updatedUser = await usersService.updateProfile(
@@ -113,7 +109,7 @@ module.exports.updateProfile = async (req, res, next) => {
       name,
       email,
       password,
-      phone,
+      username,
       avatar
     );
 
@@ -133,21 +129,21 @@ module.exports.updateUserProfile = async (req, res, next) => {
   try {
     const {
       lang = "ar",
-      emailOrPhone,
+      emailOrUsername,
       name,
       email,
       password,
-      phone,
+      username,
     } = req.body;
     const avatar = req?.files?.avatar || null;
 
     const updatedUser = await usersService.updateUserProfile(
       lang,
-      emailOrPhone,
+      emailOrUsername,
       name,
       email,
       password,
-      phone,
+      username,
       avatar
     );
 
@@ -159,9 +155,9 @@ module.exports.updateUserProfile = async (req, res, next) => {
 
 module.exports.verifyUser = async (req, res, next) => {
   try {
-    const { emailOrPhone } = req.body;
+    const { emailOrUsername } = req.body;
 
-    const updatedUser = await usersService.verifyUser(emailOrPhone);
+    const updatedUser = await usersService.verifyUser(emailOrUsername);
 
     res.status(httpStatus.CREATED).json(_.pick(updatedUser, CLIENT_SCHEMA));
   } catch (err) {
@@ -171,9 +167,12 @@ module.exports.verifyUser = async (req, res, next) => {
 
 module.exports.changeUserRole = async (req, res, next) => {
   try {
-    const { emailOrPhone, role } = req.body;
+    const { emailOrUsername, role } = req.body;
 
-    const updatedUser = await usersService.changeUserRole(emailOrPhone, role);
+    const updatedUser = await usersService.changeUserRole(
+      emailOrUsername,
+      role
+    );
 
     res.status(httpStatus.CREATED).json(_.pick(updatedUser, CLIENT_SCHEMA));
   } catch (err) {
@@ -181,12 +180,12 @@ module.exports.changeUserRole = async (req, res, next) => {
   }
 };
 
-module.exports.findUserByEmailOrPhone = async (req, res, next) => {
+module.exports.findUserByEmailOrUsername = async (req, res, next) => {
   try {
-    const { role, id: emailOrPhone } = req.params;
+    const { role, id: emailOrUsername } = req.params;
 
-    const user = await usersService.findUserByEmailOrPhone(
-      emailOrPhone,
+    const user = await usersService.findUserByEmailOrUsername(
+      emailOrUsername,
       role,
       true
     );

@@ -5,7 +5,7 @@ const httpStatus = require("http-status");
 const errors = require("../../config/errors");
 const usersService = require("./users.service");
 
-module.exports.register = async (email, password, name, phone, role) => {
+module.exports.register = async (email, password, name, username, role) => {
   try {
     // Hashing password
     const salt = await bcrypt.genSalt(10);
@@ -16,19 +16,18 @@ module.exports.register = async (email, password, name, phone, role) => {
       name,
       email,
       password: hashed,
-      phone,
+      username,
       role,
     });
 
-    // Updating verification codes to be sent to the user
+    // Updating email verification code to be sent to user's email
     user.updateEmailVerificationCode();
-    user.updatePhoneVerificationCode();
 
     return await user.save();
   } catch (err) {
     if (err.code === errors.codes.duplicateIndexKey) {
       const statusCode = httpStatus.BAD_REQUEST;
-      const message = errors.auth.emailOrPhoneUsed;
+      const message = errors.auth.emailOrUsernameUsed;
       err = new ApiError(statusCode, message);
     }
 
@@ -36,9 +35,9 @@ module.exports.register = async (email, password, name, phone, role) => {
   }
 };
 
-module.exports.login = async (email, password) => {
+module.exports.login = async (emailOrUsername, password) => {
   try {
-    const user = await usersService.findUserByEmailOrPhone(email);
+    const user = await usersService.findUserByEmailOrUsername(emailOrUsername);
 
     // Check if user exist
     if (!user) {

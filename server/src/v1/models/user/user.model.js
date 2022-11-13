@@ -7,7 +7,7 @@ const CLIENT_SCHEMA = [
   "avatarURL",
   "name",
   "email",
-  "phone",
+  "username",
   "role",
   "verified",
   "createdAt",
@@ -33,7 +33,7 @@ const userSchema = new Schema(
       unique: true,
       trim: true,
     },
-    phone: {
+    username: {
       type: String,
       required: true,
       unique: true,
@@ -54,26 +54,12 @@ const userSchema = new Schema(
         type: Boolean,
         default: false,
       },
-      phone: {
-        type: Boolean,
-        default: false,
-      },
     },
     lastLogin: {
       type: String,
       default: new Date(),
     },
     emailVerificationCode: {
-      code: {
-        type: String,
-        default: "",
-      },
-      expiresAt: {
-        type: String,
-        default: "",
-      },
-    },
-    phoneVerificationCode: {
       code: {
         type: String,
         default: "",
@@ -106,12 +92,6 @@ userSchema.methods.updateEmailVerificationCode = function () {
   this.emailVerificationCode = { code, expiresAt };
 };
 
-userSchema.methods.updatePhoneVerificationCode = function () {
-  const code = Math.floor(1000 + Math.random() * 9000);
-  const expiresAt = new Date() + 10 * 60 * 1000;
-  this.phoneVerificationCode = { code, expiresAt };
-};
-
 userSchema.methods.generatePasswordResetCode = function () {
   const code = Math.floor(1000 + Math.random() * 9000);
   const expiresAt = new Date() + 10 * 60 * 1000;
@@ -124,14 +104,6 @@ userSchema.methods.verifyEmail = function () {
 
 userSchema.methods.isEmailVerified = function () {
   return this.verified.email;
-};
-
-userSchema.methods.verifyPhone = function () {
-  this.verified.phone = true;
-};
-
-userSchema.methods.isPhoneVerified = function () {
-  return this.verified.phone;
 };
 
 userSchema.methods.genAuthToken = function () {

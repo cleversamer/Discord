@@ -58,29 +58,25 @@ const auth = Object.freeze({
     en: "You don't have enough rights",
     ar: "ليس لديك الصلاحيّات الكافية",
   },
-  phoneNotVerified: {
-    en: "You have to verify your phone to use the app",
-    ar: "يجب عليك تفعيل رقم هاتفك لتتمكن من إستخدام التطبيق",
-  },
   emailNotUsed: {
     en: "Email is not used",
     ar: "البريد الإلكتروني غير مستخدم",
   },
-  emailOrPhoneUsed: {
-    en: "Email or phone is already used",
-    ar: "البريد الإلكتروني أو رقم الهاتف مستخدم مسبقاً",
+  emailOrUsernameUsed: {
+    en: "Email or username is already used",
+    ar: "إسم المستخدم أو البريد الإلكتروني مستخدم مسبقاً",
   },
-  emailOrPhoneNotUsed: {
-    en: "Email or phone is not used",
-    ar: "البريد الإلكتروني أو رقم الهاتف غير مستخدم",
+  emailOrUsernameNotUsed: {
+    en: "Email or username is not used",
+    ar: "إسم المستخدم أو البريد الإلكتروني غير مستخدم",
   },
   emailUsed: {
     en: "Email address is already used",
     ar: "البريد الإلكتروني مستخدم مسبقاً",
   },
-  phoneUsed: {
-    en: "Phone number is already used",
-    ar: "رقم الهاتف مستخدم مسبقاً",
+  usernameUsed: {
+    en: "Username is already used",
+    ar: "إسم المستخدم مستخدم مسبقاً",
   },
   incorrectCredentials: {
     en: "Incorrect credentials",
@@ -98,13 +94,13 @@ const auth = Object.freeze({
     en: "Invalid email address",
     ar: "البريد الإلكتروني غير صالح",
   },
-  invalidEmailOrPhone: {
-    en: "Invalid email or phone",
-    ar: "البريد الإلكتروني أو رقم الهاتف غير صالح",
+  invalidEmailOrUsername: {
+    en: "Invalid email or username",
+    ar: "إسم المستخدم أو البريد الإلكتروني غير صالح",
   },
-  invalidPhone: {
-    en: "Invalid phone number",
-    ar: "رقم الهاتف غير صالح",
+  invalidUsername: {
+    en: "Invalid username",
+    ar: "إسم المستخدم غير صالح",
   },
   invalidPassword: {
     en: "Password should be (8 ~ 32 characters) length",
@@ -125,9 +121,9 @@ const user = Object.freeze({
     en: "Your email is already verified",
     ar: "تم التحقق من بريدك الإلكتروني مسبقاً",
   },
-  phoneAlreadyVerified: {
-    en: "Your phone is already verified",
-    ar: "تم التحقق من رقم هاتفك مسبقاً",
+  emailNotVerified: {
+    en: "Your email is not verified",
+    ar: "بريدك الإلكتروني غير مفعّل",
   },
   invalidRole: {
     en: "Invalid user role",
@@ -138,8 +134,8 @@ const user = Object.freeze({
     ar: "المستخدم مسجّل بصلاحية أخرى",
   },
   alreadyVerified: {
-    en: "User's email and phone are already verified",
-    ar: "تم التحقق من رقم هاتف وبريد المستخدم مسبقاً",
+    en: "Your email is already verified",
+    ar: "تم التحقق من بريد المستخدم مسبقاً",
   },
   unsupportedLanguage: {
     en: "Unsupported language",

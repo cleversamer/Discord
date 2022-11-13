@@ -5,18 +5,18 @@ const validateUpdateProfile = [
   commonMiddleware.conditionalCheck("name", commonMiddleware.checkName),
   commonMiddleware.checkFile("avatar", ["png", "jpg", "jpeg"], false),
   commonMiddleware.conditionalCheck("email", commonMiddleware.checkEmail),
-  commonMiddleware.conditionalCheck("phone", commonMiddleware.checkPhone),
+  commonMiddleware.conditionalCheck("Username", commonMiddleware.checkUsername),
   commonMiddleware.conditionalCheck("password", commonMiddleware.checkPassword),
   commonMiddleware.next,
 ];
 
 const validateUpdateUserProfile = [
-  commonMiddleware.checkEmailOrPhone,
+  commonMiddleware.checkEmailOrUsername,
   ...validateUpdateProfile,
 ];
 
 const validateUpdateUserRole = [
-  commonMiddleware.checkEmailOrPhone,
+  commonMiddleware.checkEmailOrUsername,
 
   commonMiddleware.checkRole(true),
 
@@ -24,19 +24,19 @@ const validateUpdateUserRole = [
 ];
 
 const validateVerifyUser = [
-  commonMiddleware.checkEmailOrPhone,
+  commonMiddleware.checkEmailOrUsername,
   commonMiddleware.next,
 ];
 
-const validateFindUserByEmailOrPhone = [
+const validateFindUserByEmailOrUsername = [
   (req, res, next) => {
-    req.body.emailOrPhone = req?.params?.id?.toLowerCase();
+    req.body.emailOrUsername = req?.params?.id?.toLowerCase();
     req.body.role = req?.params?.role?.toLowerCase();
 
     next();
   },
 
-  commonMiddleware.checkEmailOrPhone,
+  commonMiddleware.checkEmailOrUsername,
 
   commonMiddleware.checkRole(true),
 
@@ -48,5 +48,5 @@ module.exports = {
   validateUpdateUserProfile,
   validateUpdateUserRole,
   validateVerifyUser,
-  validateFindUserByEmailOrPhone,
+  validateFindUserByEmailOrUsername,
 };

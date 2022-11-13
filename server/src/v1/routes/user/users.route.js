@@ -10,25 +10,12 @@ router
   .get(
     auth("readOwn", "emailVerificationCode", true),
     authValidator.resendCodeValidator,
-    usersController.resendEmailOrPhoneVerificationCode("email")
+    usersController.resendVerificationCode("email")
   )
   .post(
     auth("updateOwn", "emailVerificationCode", true),
     authValidator.codeValidator,
-    usersController.verifyEmailOrPhone("email")
-  );
-
-router
-  .route("/verify-phone")
-  .get(
-    auth("readOwn", "phoneVerificationCode", true),
-    authValidator.resendCodeValidator,
-    usersController.resendEmailOrPhoneVerificationCode("phone")
-  )
-  .post(
-    auth("updateOwn", "phoneVerificationCode", true),
-    authValidator.codeValidator,
-    usersController.verifyEmailOrPhone("phone")
+    usersController.verifyIdentifier("email")
   );
 
 router
@@ -81,8 +68,8 @@ router.patch(
 router.get(
   "/:role/:id",
   auth("readAny", "user"),
-  userValidator.validateFindUserByEmailOrPhone,
-  usersController.findUserByEmailOrPhone
+  userValidator.validateFindUserByEmailOrUsername,
+  usersController.findUserByEmailOrUsername
 );
 
 module.exports = router;

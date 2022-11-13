@@ -6,15 +6,18 @@ const localStorage = require("../storage/localStorage.service");
 const { ApiError } = require("../../middleware/apiError");
 const errors = require("../../config/errors");
 
-module.exports.findUserByEmailOrPhone = async (
-  emailOrPhone,
+module.exports.findUserByEmailOrUsername = async (
+  emailOrUsername,
   role = "",
   withError = false
 ) => {
   try {
-    // Find user by email or phone
+    // Find user by email or username
     const user = await User.findOne({
-      $or: [{ email: { $eq: emailOrPhone } }, { phone: { $eq: emailOrPhone } }],
+      $or: [
+        { email: { $eq: emailOrUsername } },
+        { username: { $eq: emailOrUsername } },
+      ],
     });
 
     // Throwing error if no user found and `throwError = true`
@@ -55,17 +58,16 @@ module.exports.validateToken = (token) => {
   }
 };
 
-module.exports.verifyEmailOrPhone = async (key, user, code) => {
+module.exports.verifyIdentifier = async (key, user, code) => {
   try {
     // Ensure that key is correct
     key = key.toLowerCase();
-    if (!["email", "phone"].includes(key)) {
+    if (key !== "email") {
       key = "email";
     }
 
-    // Check if user's email or phone is verified
-    const isVerified =
-      key === "email" ? user.isEmailVerified() : user.isPhoneVerified();
+    // Check if user's email verified
+    const isVerified = user.isEmailVerified();
     if (isVerified) {
       const statusCode = httpStatus.BAD_REQUEST;
       const message = errors.user[`${key}AlreadyVerified`];
@@ -88,12 +90,8 @@ module.exports.verifyEmailOrPhone = async (key, user, code) => {
       throw new ApiError(statusCode, message);
     }
 
-    // Verify user's email or phone
-    if (key === "email") {
-      user.verifyEmail();
-    } else {
-      user.verifyPhone();
-    }
+    // Verify user's email
+    user.verifyEmail();
 
     return await user.save();
   } catch (err) {
@@ -101,35 +99,30 @@ module.exports.verifyEmailOrPhone = async (key, user, code) => {
   }
 };
 
-module.exports.resendEmailOrPhoneVerificationCode = async (key, user, lang) => {
+module.exports.resendVerificationCode = async (key, user, lang) => {
   try {
     // Ensure that key is correct
     key = key.toLowerCase();
-    if (!["email", "phone"].includes(key)) {
+    if (key !== "email") {
       key = "email";
     }
 
-    // Check if user's email or phone is verified
-    const isVerified =
-      key === "email" ? user.isEmailVerified() : user.isPhoneVerified();
+    // Check if user's email is verified
+    const isVerified = user.isEmailVerified();
     if (isVerified) {
       const statusCode = httpStatus.BAD_REQUEST;
       const message = errors.user[`${key}AlreadyVerified`];
       throw new ApiError(statusCode, message);
     }
 
-    // Update user's email or phone verification code
-    // Send code in a message to user's email or phone
+    // Update user's email verification code
+    // Send code in a message to user's email
     // Save user
-    if (key === "email") user.updateEmailVerificationCode();
-    else user.updatePhoneVerificationCode();
+    user.updateEmailVerificationCode();
     await user.save();
 
-    // Sending email or phone verification code to user's email or phone
-    if (key === "email")
-      await emailService.registerEmail(lang, user.email, user);
-
-    // TODO: send phone verification code to user's phone
+    // Sending email verification code to user's email
+    await emailService.registerEmail(lang, user.email, user);
   } catch (err) {
     throw err;
   }
@@ -153,13 +146,13 @@ module.exports.changePassword = async (user, oldPassword, newPassword) => {
   }
 };
 
-module.exports.sendForgotPasswordCode = async (emailOrPhone, sendTo, lang) => {
+module.exports.sendForgotPasswordCode = async (emailOrUsername, lang) => {
   try {
     // Check if user exists
-    const user = await this.findUserByEmailOrPhone(emailOrPhone);
+    const user = await this.findUserByEmailOrUsername(emailOrUsername);
     if (!user) {
       const statusCode = httpStatus.NOT_FOUND;
-      const message = errors.auth.emailOrPhoneNotUsed;
+      const message = errors.auth.emailOrUsernameNotUsed;
       throw new ApiError(statusCode, message);
     }
 
@@ -167,25 +160,20 @@ module.exports.sendForgotPasswordCode = async (emailOrPhone, sendTo, lang) => {
     user.generatePasswordResetCode();
     const updatedUser = await user.save();
 
-    // Send password reset code to phone or
-    if (sendTo === "phone") {
-      // TODO: send forgot password code to user's phone.
-    } else {
-      await emailService.forgotPasswordEmail(lang, user.email, updatedUser);
-    }
+    await emailService.forgotPasswordEmail(lang, user.email, updatedUser);
   } catch (err) {
     throw err;
   }
 };
 
 module.exports.resetPasswordWithCode = async (
-  emailOrPhone,
+  emailOrUsername,
   code,
   newPassword
 ) => {
   try {
     // Check if user exists
-    const user = await this.findUserByEmailOrPhone(emailOrPhone);
+    const user = await this.findUserByEmailOrUsername(emailOrUsername);
     if (!user) {
       const statusCode = httpStatus.NOT_FOUND;
       const message = errors.auth.emailNotUsed;
@@ -223,7 +211,7 @@ module.exports.updateProfile = async (
   name,
   email,
   password,
-  phone,
+  username,
   avatar
 ) => {
   try {
@@ -232,7 +220,7 @@ module.exports.updateProfile = async (
       name,
       email,
       password,
-      phone,
+      username,
       avatar,
     };
 
@@ -243,10 +231,10 @@ module.exports.updateProfile = async (
 };
 
 ///////////////////////////// ADMIN /////////////////////////////
-module.exports.changeUserRole = async (emailOrPhone, role) => {
+module.exports.changeUserRole = async (emailOrUsername, role) => {
   try {
     // Check if user exists
-    const user = await this.findUserByEmailOrPhone(emailOrPhone);
+    const user = await this.findUserByEmailOrUsername(emailOrUsername);
     if (!user) {
       const statusCode = httpStatus.NOT_FOUND;
       const message = errors.user.notFound;
@@ -262,26 +250,25 @@ module.exports.changeUserRole = async (emailOrPhone, role) => {
   }
 };
 
-module.exports.verifyUser = async (emailOrPhone) => {
+module.exports.verifyUser = async (emailOrUsername) => {
   try {
     // Check if used exists
-    const user = await this.findUserByEmailOrPhone(emailOrPhone);
+    const user = await this.findUserByEmailOrUsername(emailOrUsername);
     if (!user) {
       const statusCode = httpStatus.NOT_FOUND;
       const message = errors.user.notFound;
       throw new ApiError(statusCode, message);
     }
 
-    // Check if user's email and phone are already verified
-    if (user.verified.email && user.verified.phone) {
+    // Check if user's email is already verified
+    if (user.isEmailVerified()) {
       const statusCode = httpStatus.BAD_REQUEST;
       const message = errors.user.alreadyVerified;
       throw new ApiError(statusCode, message);
     }
 
-    // Verify user's email and phone
+    // Verify user's email
     user.verifyEmail();
-    user.verifyPhone();
 
     return await user.save();
   } catch (err) {
@@ -291,16 +278,16 @@ module.exports.verifyUser = async (emailOrPhone) => {
 
 module.exports.updateUserProfile = async (
   lang,
-  emailOrPhone,
+  emailOrUsername,
   name,
   email,
   password,
-  phone,
+  username,
   avatar
 ) => {
   try {
     // Checking if user exists
-    const user = await this.findUserByEmailOrPhone(emailOrPhone);
+    const user = await this.findUserByEmailOrUsername(emailOrUsername);
     if (!user) {
       const statusCode = httpStatus.NOT_FOUND;
       const message = errors.user.notFound;
@@ -312,7 +299,7 @@ module.exports.updateUserProfile = async (
       name,
       email,
       password,
-      phone,
+      username,
       avatar,
     };
 
@@ -324,7 +311,7 @@ module.exports.updateUserProfile = async (
 
 const updateUserProfile = async (user, body) => {
   try {
-    const { name, avatar, password, email, phone, lang } = body;
+    const { name, avatar, password, email, username, lang } = body;
 
     // To detect updates
     let userChanged = false;
@@ -354,10 +341,10 @@ const updateUserProfile = async (user, body) => {
     // email verification code to user's email
     if (email && user.email !== email) {
       // Checking if email used
-      const emailUsed = await this.findUserByEmailOrPhone(email);
+      const emailUsed = await this.findUserByEmailOrUsername(email);
       if (emailUsed) {
         const statusCode = httpStatus.NOT_FOUND;
-        const message = errors.auth.emailOrPhoneUsed;
+        const message = errors.auth.emailUsed;
         throw new ApiError(statusCode, message);
       }
 
@@ -371,27 +358,21 @@ const updateUserProfile = async (user, body) => {
       await emailService.changeEmail(lang, email, user);
     }
 
-    // Updating phone, setting phone as not verified,
-    // update phone verification code, and sending
-    // phone verification code to user's phone
-    if (phone && user.phone !== phone) {
-      // Checking if phone used
-      const phoneUsed = await this.findUserByEmailOrPhone(phone);
-      if (phoneUsed) {
+    // Updating username
+    if (username && user.username !== username) {
+      // Checking if username used
+      const usernameUsed = await this.findUserByEmailOrUsername(username);
+      if (usernameUsed) {
         const statusCode = httpStatus.NOT_FOUND;
-        const message = errors.auth.emailOrPhoneUsed;
+        const message = errors.auth.usernameUsed;
         throw new ApiError(statusCode, message);
       }
 
       // Updating email, setting email as not verified,
       // update email verification code, and sending
       // email verification code to user's email
-      user.phone = phone;
-      user.verified.phone = false;
+      user.username = username;
       userChanged = true;
-      user.updatePhoneVerificationCode();
-
-      // TODO: send phone verification code to user's email.
     }
 
     return userChanged ? await user.save() : user;

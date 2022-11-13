@@ -3,7 +3,7 @@ const errors = require("../../../config/errors");
 const commonMiddleware = require("../common");
 
 const loginValidator = [
-  commonMiddleware.checkEmailOrPhone,
+  commonMiddleware.checkEmailOrUsername,
   commonMiddleware.checkPassword,
   commonMiddleware.next,
 ];
@@ -12,7 +12,7 @@ const registerValidator = [
   commonMiddleware.checkLanguage,
   commonMiddleware.checkName,
   commonMiddleware.checkEmail,
-  commonMiddleware.checkPhone,
+  commonMiddleware.checkUsername,
   commonMiddleware.checkPassword,
   commonMiddleware.checkRole(true),
   commonMiddleware.next,
@@ -25,7 +25,7 @@ const changePasswordValidator = [
 ];
 
 const forgotPasswordValidator = [
-  commonMiddleware.checkEmailOrPhone,
+  commonMiddleware.checkEmailOrUsername,
   commonMiddleware.checkNewPassword,
   commonMiddleware.checkCode,
   commonMiddleware.next,
@@ -33,24 +33,18 @@ const forgotPasswordValidator = [
 
 const getForgotPasswordCode = [
   (req, res, next) => {
-    req.query.emailOrPhone = req.query?.emailOrPhone?.toLowerCase();
+    req.query.emailOrUsername = req.query?.emailOrUsername?.toLowerCase();
     req.query.lang = req.query?.lang?.toLowerCase();
-    req.query.sendTo = req.query?.sendTo?.toLowerCase();
 
-    req.body.emailOrPhone = req.query.emailOrPhone;
+    req.body.emailOrUsername = req.query.emailOrUsername;
     req.body.lang = req.query.lang;
-    req.body.sendTo = req.query.sendTo;
 
     next();
   },
 
-  commonMiddleware.checkEmailOrPhone,
+  commonMiddleware.checkEmailOrUsername,
 
   commonMiddleware.checkLanguage,
-
-  check("sendTo")
-    .isIn(["email", "phone"])
-    .withMessage(errors.user.unsupportedReceiverType),
 
   commonMiddleware.next,
 ];

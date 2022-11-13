@@ -18,15 +18,15 @@ const next = (req, res, next) => {
   next();
 };
 
-const checkEmailOrPhone = [
+const checkEmailOrUsername = [
   (req, res, next) => {
-    req.body.emailOrPhone = req.body?.emailOrPhone?.toLowerCase();
+    req.body.emailOrUsername = req.body?.emailOrUsername?.toLowerCase();
     next();
   },
 
-  check("emailOrPhone")
+  check("emailOrUsername")
     .isLength({ min: 8, max: 256 })
-    .withMessage(errors.auth.invalidEmailOrPhone)
+    .withMessage(errors.auth.invalidEmailOrUsername)
     .bail(),
 ];
 
@@ -40,6 +40,10 @@ const checkEmail = [
 
   next,
 ];
+
+const checkUsername = check("username")
+  .isLength({ min: 4, max: 64 })
+  .withMessage(errors.auth.invalidUsername);
 
 const checkPassword = check("password")
   .isLength({ min: 8, max: 32 })
@@ -74,33 +78,6 @@ const checkRole = (exceptAdmin = false) =>
         .isIn(SUPPORTED_ROLES.filter((role) => role !== "admin"))
         .withMessage(errors.user.invalidRole)
     : check("role").isIn(SUPPORTED_ROLES).withMessage(errors.user.invalidRole);
-
-const checkPhone = (req, res, next) => {
-  let { phone } = req.body;
-
-  // Convert phone to string if it's not a string.
-  if (typeof phone !== "string") {
-    phone = String(phone);
-  }
-
-  // Check phone length (should = 10).
-  if (phone.length !== 10) {
-    const statusCode = httpStatus.BAD_REQUEST;
-    const message = errors.auth.invalidPhone;
-    const err = new ApiError(statusCode, message);
-    return next(err);
-  }
-
-  // Check if it starts with 059 or 056
-  if (!phone.startsWith("059") && !phone.startsWith("056")) {
-    const statusCode = httpStatus.BAD_REQUEST;
-    const message = errors.auth.invalidPhone;
-    const err = new ApiError(statusCode, message);
-    return next(err);
-  }
-
-  next();
-};
 
 const checkMongoIdQueryParam = (req, res, next) => {
   const emptyQueryParams = !Object.keys(req.query).length;
@@ -175,13 +152,13 @@ const checkFile =
 
 module.exports = {
   next,
-  checkPhone,
   checkMongoIdQueryParam,
   conditionalCheck,
   checkFile,
   checkMongoIdParam,
-  checkEmailOrPhone,
+  checkEmailOrUsername,
   checkEmail,
+  checkUsername,
   checkPassword,
   checkOldPassword,
   checkNewPassword,
