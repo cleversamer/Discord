@@ -1,4 +1,4 @@
-const { Schema, model } = require("mongoose");
+const { Schema, model, Types } = require("mongoose");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
@@ -9,6 +9,7 @@ const CLIENT_SCHEMA = [
   "email",
   "username",
   "role",
+  "servers",
   "verified",
   "createdAt",
   "lastLogin",
@@ -49,6 +50,12 @@ const userSchema = new Schema(
       enum: SUPPORTED_ROLES,
       default: "user",
     },
+    servers: [
+      {
+        type: Types.ObjectId,
+        ref: "Server",
+      },
+    ],
     verified: {
       email: {
         type: Boolean,

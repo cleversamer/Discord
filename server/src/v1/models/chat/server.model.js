@@ -1,4 +1,4 @@
-const { Schema, model } = require("mongoose");
+const { Schema, model, Types } = require("mongoose");
 const bcrypt = require("bcrypt");
 
 const CLIENT_SCHEMA = [
@@ -6,23 +6,29 @@ const CLIENT_SCHEMA = [
   "photoURL",
   "status",
   "name",
+  "author",
   "channels",
   "members",
   "createdAt",
 ];
-
-const SUPPORTED_ROLES = ["user", "admin"];
 
 const serverSchema = new Schema(
   {
     photoURL: {
       type: String,
       default: "",
+      trim: true,
     },
     status: {
       type: String,
       enum: ["private", "public"],
       default: "public",
+      required: true,
+      trim: true,
+    },
+    author: {
+      type: Types.ObjectId,
+      ref: "User",
       required: true,
     },
     name: {
@@ -32,17 +38,21 @@ const serverSchema = new Schema(
     },
     password: {
       type: String,
-      trim: true,
       default: "",
+      trim: true,
     },
-    channels: {
-      type: Array,
-      default: [],
-    },
-    members: {
-      type: Array,
-      default: [],
-    },
+    channels: [
+      {
+        type: Types.ObjectId,
+        ref: "Channel",
+      },
+    ],
+    members: [
+      {
+        type: Types.ObjectId,
+        ref: "User",
+      },
+    ],
   },
   {
     minimize: false,
@@ -65,5 +75,4 @@ const Server = model("Server", serverSchema);
 module.exports = {
   Server,
   CLIENT_SCHEMA,
-  SUPPORTED_ROLES,
 };
