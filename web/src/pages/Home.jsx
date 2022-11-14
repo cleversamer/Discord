@@ -1,9 +1,14 @@
+import styled from "styled-components";
+import Sidebar from "components/sidebar";
+
 const Home = () => {
   return (
-    <div>
-      <h1>Home</h1>
-    </div>
+    <Container>
+      <Sidebar />
+    </Container>
   );
 };
+
+const Container = styled.div``;
 
 export default Home;
